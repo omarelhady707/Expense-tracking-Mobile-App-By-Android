@@ -2,8 +2,10 @@ package com.example.budgetplanner.UIpages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -19,14 +21,32 @@ import androidx.compose.ui.unit.sp
 import com.example.budgetplanner.R
 
 @Composable
-fun AccountScreen() {
+fun AccountScreen(onEditClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 200.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            IconButton(onClick = { onEditClick() }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.edit),
+                    contentDescription = "Edit Profile",
+                    tint = Color.Unspecified
+                )
+            }
+        }
+
+
         // ===== User Image =====
         Image(
             painter = painterResource(id = R.drawable.boy),
@@ -38,16 +58,10 @@ fun AccountScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ===== Name =====
-        Text(
-            text = "Amr Muhammed",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text("Amr Muhammed", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // ===== Email =====
         Text(
             text = "amr.muhammed@example.com",
             fontSize = 18.sp,
@@ -56,16 +70,15 @@ fun AccountScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ===== User Info Cards =====
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            InfoCard(icon = Icons.Default.Phone, title = "Phone", value = "+20 123 456 7890")
-            InfoCard(icon = Icons.Default.Home, title = "Address", value = "Cairo, Egypt")
-            InfoCard(icon = Icons.Default.ShoppingCart, title = "Income", value = "$10,840.00")
-            InfoCard(icon = Icons.Default.Star, title = "Membership", value = "Premium")
-            InfoCard(icon = Icons.Default.Lock, title = "Password", value = "********")
+            InfoCard(Icons.Default.Phone, "Phone", "+20 123 456 7890")
+            InfoCard(Icons.Default.Home, "Address", "Cairo, Egypt")
+            InfoCard(Icons.Default.ShoppingCart, "Income", "$10,840.00")
+            InfoCard(Icons.Default.Star, "Membership", "Premium")
+            InfoCard(Icons.Default.Lock, "Password", "********")
         }
     }
 }

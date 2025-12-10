@@ -1,5 +1,6 @@
 package com.example.budgetplanner
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,11 +33,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "login") {
 
-        // ===== Login Screen =====
         composable("login") {
             LoginScreen(
                 onLoginClick = { email, password ->
@@ -48,7 +50,6 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // ===== SignUp Screen =====
         composable("signup") {
             SignUpScreen(
                 onSignUpClick = { name, email, password ->
@@ -60,30 +61,44 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // ===== Dashboard Screen WITH BottomNavigation =====
+        // ===== Dashboard Screen =====
         composable("dashboard") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
+            ) {
                 MainDashboardScreen(navController)
             }
         }
 
-        // ===== AddExpense Screen WITH BottomNavigation =====
+        // ===== Add Expense Screen =====
         composable("addExpense") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
+            ) {
                 AddExpenseScreen()
             }
         }
 
-        // ===== Account Screen WITH BottomNavigation =====
+        // ===== Account Screen =====
         composable("account") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
-                AccountScreen()
+            ) {
+                AccountScreen(
+                    onEditClick = {
+                        navController.navigate("editAccount")
+                    }
+                )
+            }
+        }
+
+
+        // ===== Edit Account Screen =====
+        composable("editAccount") {
+            EditAccountScreen { phone, address, income, password ->
+                navController.navigateUp()
+
+                // TODO:Save in Database ya 7adu
             }
         }
     }

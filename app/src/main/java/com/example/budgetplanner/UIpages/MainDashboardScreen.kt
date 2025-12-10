@@ -3,6 +3,8 @@ package com.example.budgetplanner.UIpages
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -31,7 +33,8 @@ fun MainDashboardScreen(navController: NavHostController) {
 
         Column(
             modifier = Modifier
-                .padding(innerPadding)
+                .padding(innerPadding) .verticalScroll(rememberScrollState()).padding(bottom = 200.dp)
+
                 .padding(20.dp)
         ) {
             // ====== Greeting ======
