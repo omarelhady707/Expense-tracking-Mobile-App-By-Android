@@ -7,6 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,12 +38,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
+    var currentUserId by remember { mutableStateOf<Int?>(null) } // لتخزين الـ userId بعد تسجيل الدخول
+
     NavHost(navController = navController, startDestination = "login") {
 
         // ===== Login Screen =====
         composable("login") {
             LoginScreen(
-                onLoginClick = { email, password ->
+                onLoginClick = { id ->
+                    currentUserId = id
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
@@ -65,25 +72,27 @@ fun AppNavigation(navController: NavHostController) {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
-                MainDashboardScreen(navController)
+                currentUserId?.let { userId ->
+                    MainDashboardScreen(navController, userId)
+                }
             }
-        }
 
-        // ===== AddExpense Screen WITH BottomNavigation =====
-        composable("addExpense") {
-            Scaffold(
-                bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
-                AddExpenseScreen()
+            // ===== AddExpense Screen WITH BottomNavigation =====
+            composable("addExpense") {
+                Scaffold(
+                    bottomBar = { BottomNavigationBar(navController) }
+                ) { innerPadding ->
+                    AddExpenseScreen()
+                }
             }
-        }
 
-        // ===== Account Screen WITH BottomNavigation =====
-        composable("account") {
-            Scaffold(
-                bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
-                AccountScreen()
+            // ===== Account Screen WITH BottomNavigation =====
+            composable("account") {
+                Scaffold(
+                    bottomBar = { BottomNavigationBar(navController) }
+                ) { innerPadding ->
+                    AccountScreen()
+                }
             }
         }
     }

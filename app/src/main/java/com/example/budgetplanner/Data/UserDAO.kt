@@ -9,6 +9,9 @@ import androidx.room.Query
 interface UserDAO {
     @Query("Select * From usertable")
     suspend fun getAllUsers():List<UserEntity> //For Admin
+
+    @Query("SELECT * FROM usertable WHERE userId = :id LIMIT 1")
+    fun getUserById(id: Int): UserEntity?
     @Insert
     suspend fun addUser(user: UserEntity)
     @Delete

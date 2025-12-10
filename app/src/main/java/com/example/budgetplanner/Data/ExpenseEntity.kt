@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey
     ]
     )
 data class ExpenseEntity(
-    @PrimaryKey(autoGenerate = true) val expenseid :Int,
+    @PrimaryKey(autoGenerate = true) val expenseid :Int=0,
     val userId: Int, // foreign key
     val category : String,
     val date : String,

@@ -1,26 +1,36 @@
 package com.example.budgetplanner.UIpages
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.budgetplanner.ExpenseViewModel
+import com.example.budgetplanner.ViewModell.LoginViewModel
+import com.example.budgetplanner.ViewModell.LoginViewModelFactory
+import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit,
+    onLoginClick: (Int) -> Unit,
     onSignUpClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
+    val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
+    val viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(db))
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState()).padding(bottom = 200.dp)
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -58,12 +68,26 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { onLoginClick(email, password) },
+            onClick = {
+                viewModel.getUserByEmailandPassword(email,password)
+                if(viewModel.loginResult.value){
+                    print("Sucsess Login")
+                }else{
+                    print("Fail to Login")
+                }
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
         ) {
             Text("Login", fontSize = 16.sp)
+        }
+        LaunchedEffect(viewModel.loginResult.value) {
+            if (viewModel.loginResult.value) {
+                viewModel.user_id.value?.let { id ->
+                    onLoginClick(id)  // <-- هنا بنمرر userId
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

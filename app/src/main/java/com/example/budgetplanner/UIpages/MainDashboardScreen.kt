@@ -3,6 +3,8 @@ package com.example.budgetplanner.UIpages
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -13,14 +15,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.budgetplanner.ViewModell.MainDashBoardViewModel
+import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
+import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
-fun MainDashboardScreen(navController: NavHostController) {
-
+fun MainDashboardScreen(navController: NavHostController,userId:Int) {
+    val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
+    val viewModel : MainDashBoardViewModel = viewModel(factory = MainDashboardViewModelFactory(db,userId))
     val recentExpenses = listOf<String>()
 
     Scaffold(
@@ -31,6 +39,8 @@ fun MainDashboardScreen(navController: NavHostController) {
 
         Column(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 200.dp)
                 .padding(innerPadding)
                 .padding(20.dp)
         ) {
