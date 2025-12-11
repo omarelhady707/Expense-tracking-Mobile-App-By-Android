@@ -137,7 +137,7 @@ fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
             )
 
             Text(
-                text = "$2,548.00",
+                text = viewModel.BalancePrice.value.toString(),
                 color = Color.White,
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold

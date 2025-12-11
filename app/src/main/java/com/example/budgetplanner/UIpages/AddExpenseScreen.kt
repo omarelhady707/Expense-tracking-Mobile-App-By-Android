@@ -222,7 +222,7 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
                         amount = amount.toDouble(),
                         date = date
                     )
-                    viewModel.AddExpense_And_Update_Budget(expense)
+                    viewModel.AddExpense(expense)
                 }
 
             },

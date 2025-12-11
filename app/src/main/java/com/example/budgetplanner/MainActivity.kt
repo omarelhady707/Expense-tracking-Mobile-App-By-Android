@@ -97,9 +97,21 @@ fun AppNavigation(navController: NavHostController) {
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
                 currentUserId?.let { userId ->
-                    AccountScreen(modifier = Modifier.padding(innerPadding), userId)
+                    AccountScreen(modifier = Modifier.padding(innerPadding), userId, onEditClick = {
+                        navController.navigate("editAccount")
+                    }
+                    )
                 }
             }
         }
+        composable("editAccount") {
+            currentUserId?.let { userId ->
+                EditAccountScreen(
+                    user_Id = userId,
+                    navController = navController
+                )
+            }
+        }
+
     }
 }

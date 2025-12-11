@@ -22,6 +22,9 @@ interface UserDAO {
 
     @Query("UPDATE usertable SET budget = :newBudget WHERE userId = :id")
     suspend fun updateBudget(id: Int, newBudget: Double)
+
+    @Query("UPDATE usertable SET password = :pass WHERE userId = :id")
+    suspend fun updatePassword(id: Int, pass: String)
     @Query("UPDATE usertable SET totExpense = :newTot WHERE userId = :id")
     suspend fun updateTotExpense(id: Int, newTot: Double)
 

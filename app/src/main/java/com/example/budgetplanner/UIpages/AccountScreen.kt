@@ -26,7 +26,7 @@ import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
-fun AccountScreen(modifier: Modifier = Modifier,user_Id: Int) {
+fun AccountScreen(modifier: Modifier = Modifier,user_Id: Int,onEditClick: () -> Unit) {
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
     print("User Id: ${user_Id} ")
     val viewModel: MainDashBoardViewModel =
@@ -43,6 +43,18 @@ fun AccountScreen(modifier: Modifier = Modifier,user_Id: Int) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { onEditClick() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.edit),
+                        contentDescription = "Edit Profile",
+                        tint = Color.Unspecified
+                    )
+                }
+            }
             // ===== User Image =====
             Image(
                 painter = painterResource(id = R.drawable.boy),
