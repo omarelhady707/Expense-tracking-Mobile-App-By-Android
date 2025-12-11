@@ -70,11 +70,6 @@ fun LoginScreen(
         Button(
             onClick = {
                 viewModel.getUserByEmailandPassword(email,password)
-                if(viewModel.loginResult.value){
-                    print("Sucsess Login")
-                }else{
-                    print("Fail to Login")
-                }
                       },
             modifier = Modifier
                 .fillMaxWidth()

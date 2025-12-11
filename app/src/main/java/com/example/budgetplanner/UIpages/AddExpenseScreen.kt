@@ -35,14 +35,14 @@ data class CategoryItem(
 )
 
 @Composable
-fun AddExpenseScreen() {
+fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
     val calendar = Calendar.getInstance()
     var category by remember { mutableStateOf("Entertainment") }
     var amount by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var selectedDay by remember { mutableStateOf(calendar.get(Calendar.DAY_OF_MONTH)) }
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
-    //val viewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(db))
+    val viewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(db))
     val categoriesList = listOf(
         "Groceries", "Entertainment", "Gas", "Shopping",
         "News Paper", "Transport", "Rent", "Add Category"
@@ -116,7 +116,7 @@ fun AddExpenseScreen() {
         OutlinedTextField(
             value = amount,
             onValueChange = { amount = it },
-            placeholder = { Text("$50,000") },
+            placeholder = { Text("$00,000") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -215,13 +215,16 @@ fun AddExpenseScreen() {
         // ===== Save Button =====
         Button(
             onClick = { /* Save Expense */
-          /*    val expense = ExpenseEntity(
-                    userId = 1, // Don`t forget replace 1 by the user_id
-                    category = category,
-                    amount = amount.toDouble(),
-                    date = date
-                )
-                viewModel.AddExpense(expense)*/
+                user_Id?.let { id ->
+                    val expense = ExpenseEntity(
+                        userId = id,
+                        category = category,
+                        amount = amount.toDouble(),
+                        date = date
+                    )
+                    viewModel.AddExpense_And_Update_Budget(expense)
+                }
+
             },
             modifier = Modifier
                 .fillMaxWidth()

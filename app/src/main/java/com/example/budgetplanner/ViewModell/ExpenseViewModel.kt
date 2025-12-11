@@ -8,9 +8,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ExpenseViewModel(private val db: ExpenseUserDataBase) : ViewModel() {
-    fun AddExpense(User_Expense: ExpenseEntity) {
+    fun AddExpense_And_Update_Budget(User_Expense: ExpenseEntity) {
         viewModelScope.launch(Dispatchers.IO) {
         db.getExpenseDao().addExpense(User_Expense)
+         val user =db.getUserDao().getUserById(User_Expense.userId)
+         user.let {
+             val newBudget:Double = (it?.budget?.minus(User_Expense.amount) ?: 0) as Double
+            db.getUserDao().updateBudget(User_Expense.userId,newBudget)
+
+             var old_tot_Expense= user?.totExpense?:0.0
+             val newTotExpense:Double = User_Expense.amount+ old_tot_Expense
+             db.getUserDao().updateTotExpense(User_Expense.userId,newTotExpense)
+         }
+
+
         }
     }
     fun get_AllExpense_per_UserID(User_Expense: ExpenseEntity) {

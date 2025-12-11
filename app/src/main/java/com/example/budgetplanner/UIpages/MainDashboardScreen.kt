@@ -3,8 +3,6 @@ package com.example.budgetplanner.UIpages
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -23,84 +21,95 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.budgetplanner.ViewModell.MainDashBoardViewModel
 import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
+import com.example.expensetrackingapp.Data.ExpenseEntity
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
-fun MainDashboardScreen(navController: NavHostController,userId:Int) {
+fun MainDashboardScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    userId: Int
+) {
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
-    val viewModel : MainDashBoardViewModel = viewModel(factory = MainDashboardViewModelFactory(db,userId))
-    val recentExpenses = listOf<String>()
+    val viewModel: MainDashBoardViewModel = viewModel(factory = MainDashboardViewModelFactory(db, userId))
+    val list = viewModel.userexpanses.value ?: emptyList()
 
     Scaffold(
-        bottomBar = {
-            BottomNavigationBar(navController)
-        }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
-
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 200.dp)
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(20.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ====== Greeting ======
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null,
-                        tint = Color.Blue,
-                        modifier = Modifier.size(45.dp)
-                    )
+            // ===== Greeting =====
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = null,
+                            tint = Color.Blue,
+                            modifier = Modifier.size(45.dp)
+                        )
+                    }
+
+                    Column {
+                        Text(
+                            text = viewModel.userinfo.value?.name ?: "Erorr",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 26.sp
+                        )
+                        Text(
+                            text = ", Good Morning",
+                            fontSize = 20.sp,
+                            color = Color.Gray
+                        )
+                    }
                 }
 
-                Column {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // ===== Balance Card =====
+            item {
+                BalanceCard(userId, viewModel)
+            }
+
+            // ===== Recent Expenses Header =====
+            item {
+                Text(
+                    text = "Recent Expenses",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // ===== Expenses List =====
+            if (list.isEmpty()) {
+                item {
                     Text(
-                        text = "Amr Muhammed",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 26.sp
-                    )
-                    Text(
-                        text = ", Good Morning",
-                        fontSize = 20.sp,
+                        text = "No expenses yet.",
                         color = Color.Gray
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ====== Balance Card ======
-            BalanceCard()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ====== Recent Expenses ======
-            Text(
-                text = "Recent Expenses",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (recentExpenses.isEmpty()) {
-                Text(
-                    text = "No expenses yet.",
-                    color = Color.Gray
-                )
             } else {
-                LazyColumn {
-                    items(recentExpenses) { item ->
-                        Text(text = item)
-                        Spacer(modifier = Modifier.height(8.dp))
+                items(list) { expense ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = expense.category)
+                        Text(text = "$${expense.amount}")
                     }
                 }
             }
@@ -108,19 +117,17 @@ fun MainDashboardScreen(navController: NavHostController,userId:Int) {
     }
 }
 
-
 // ========================================
 // BALANCE CARD
 // ========================================
 @Composable
-fun BalanceCard() {
+fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF3F51F5)
         )
     ) {
-
         Column(modifier = Modifier.padding(20.dp)) {
 
             Text(
@@ -145,11 +152,11 @@ fun BalanceCard() {
 
                 Column {
                     Text(
-                        "Income",
+                        "Budget",
                         color = Color.White.copy(0.7f)
                     )
                     Text(
-                        "$10,840.00",
+                        viewModel.userinfo.value?.budget.toString(),
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -157,11 +164,11 @@ fun BalanceCard() {
 
                 Column {
                     Text(
-                        "Expenses",
+                        "Total Expenses",
                         color = Color.White.copy(0.7f)
                     )
                     Text(
-                        "$1,884.00",
+                        viewModel.userinfo.value?.totExpense.toString() ?: "Erorr",
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -200,4 +207,3 @@ fun BottomNavigationBar(navController: NavHostController) {
         )
     }
 }
-

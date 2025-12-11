@@ -11,13 +11,18 @@ interface UserDAO {
     suspend fun getAllUsers():List<UserEntity> //For Admin
 
     @Query("SELECT * FROM usertable WHERE userId = :id LIMIT 1")
-    fun getUserById(id: Int): UserEntity?
+    suspend fun getUserById(id: Int): UserEntity?
     @Insert
-    suspend fun addUser(user: UserEntity)
+    suspend fun addUser(user: UserEntity): Long
     @Delete
     suspend fun DeleteUser(user: UserEntity)
 
     @Query("SELECT * FROM usertable WHERE email = :email AND Password = :password ")
     suspend fun login(email: String, password: String): UserEntity?
+
+    @Query("UPDATE usertable SET budget = :newBudget WHERE userId = :id")
+    suspend fun updateBudget(id: Int, newBudget: Double)
+    @Query("UPDATE usertable SET totExpense = :newTot WHERE userId = :id")
+    suspend fun updateTotExpense(id: Int, newTot: Double)
 
 }

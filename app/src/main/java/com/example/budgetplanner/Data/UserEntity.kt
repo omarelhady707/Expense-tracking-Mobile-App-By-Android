@@ -9,5 +9,6 @@ data class UserEntity(
     val name : String,
     val email : String,
     val Password : String,
-    val budget : Int
+    val budget : Double,
+    val totExpense: Double
 )

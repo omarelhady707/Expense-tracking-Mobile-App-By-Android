@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [UserEntity::class, ExpenseEntity::class], version = 1)
+@Database(entities = [UserEntity::class, ExpenseEntity::class], version = 2)
 abstract class ExpenseUserDataBase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDAO
@@ -21,7 +21,8 @@ abstract class ExpenseUserDataBase : RoomDatabase() {
                     context.applicationContext,
                     ExpenseUserDataBase::class.java,
                     "expense_db"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
                     .also { INSTANCE = it }
             }
         }
