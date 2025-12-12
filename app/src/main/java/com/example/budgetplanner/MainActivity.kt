@@ -55,7 +55,8 @@ fun AppNavigation(
     var currentUserId by remember { mutableStateOf(savedUserId) }
 
 
-    val start = if (isLoggedIn && savedUserId != null) "dashboard" else "login"
+    //val start = if (isLoggedIn && savedUserId != null) "dashboard" else "login"
+    val start = "splash"
 
     NavHost(navController = navController, startDestination = start) {
 
@@ -132,7 +133,7 @@ fun AppNavigation(
                                 .putInt("userId", -1)
                                 .apply()
 
-                            
+
                             navController.navigate("login") {
                                 popUpTo("dashboard") { inclusive = true }
                             }
@@ -150,6 +151,14 @@ fun AppNavigation(
                     navController = navController
                 )
             }
+        }
+        // ===== splash =====
+        composable("splash") {
+            SplashScreen(
+                navController = navController,
+                isLoggedIn = isLoggedIn,
+                savedUserId = savedUserId
+            )
         }
     }
 }
