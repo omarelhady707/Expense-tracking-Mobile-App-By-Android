@@ -1,6 +1,7 @@
 package com.example.budgetplanner
 
 import android.annotation.SuppressLint
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,12 +26,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
 
-
+        val sharedPref = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+        val savedUserId = sharedPref.getInt("userId", -1)
 
         setContent {
             BudgetPlannerTheme {
                 val navController = rememberNavController()
-                AppNavigation(navController)
+
+                AppNavigation(
+                    navController = navController,
+                    isLoggedIn = isLoggedIn,
+                    savedUserId = if (savedUserId != -1) savedUserId else null
+                )
             }
         }
     }
@@ -38,9 +46,18 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("ComposableDestinationInComposeScope")
 @Composable
-fun AppNavigation(navController: NavHostController) {
-    var currentUserId by remember { mutableStateOf<Int?>(null) }
-    NavHost(navController = navController, startDestination = "login") {
+fun AppNavigation(
+    navController: NavHostController,
+    isLoggedIn: Boolean,
+    savedUserId: Int?
+) {
+
+    var currentUserId by remember { mutableStateOf(savedUserId) }
+
+
+    val start = if (isLoggedIn && savedUserId != null) "dashboard" else "login"
+
+    NavHost(navController = navController, startDestination = start) {
 
         // ===== Login Screen =====
         composable("login") {
@@ -68,7 +85,7 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // ===== Dashboard Screen WITH BottomNavigation =====
+        // ===== Dashboard Screen =====
         composable("dashboard") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
@@ -76,34 +93,56 @@ fun AppNavigation(navController: NavHostController) {
                 currentUserId?.let { userId ->
                     MainDashboardScreen(
                         modifier = Modifier.padding(innerPadding),
-                        navController,
-                        userId
+                        navController = navController,
+                        userId = userId
                     )
                 }
             }
         }
-        // ===== AddExpense Screen WITH BottomNavigation =====
+
+        // ===== Add Expense =====
         composable("addExpense") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
-                AddExpenseScreen(modifier = Modifier.padding(innerPadding), currentUserId)
+                AddExpenseScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    user_Id = currentUserId
+                )
             }
         }
 
-        // ===== Account Screen WITH BottomNavigation =====
+        // ===== Account Screen =====
         composable("account") {
             Scaffold(
                 bottomBar = { BottomNavigationBar(navController) }
             ) { innerPadding ->
                 currentUserId?.let { userId ->
-                    AccountScreen(modifier = Modifier.padding(innerPadding), userId, onEditClick = {
-                        navController.navigate("editAccount")
-                    }
+                    AccountScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        user_Id = userId,
+                        onEditClick = { navController.navigate("editAccount") },
+                        onLogoutClick = {
+
+                            // delete  info  SharedPreferences
+                            val ctx = navController.context
+                            val sharedPref = ctx.getSharedPreferences("user_prefs", MODE_PRIVATE)
+                            sharedPref.edit()
+                                .putBoolean("isLoggedIn", false)
+                                .putInt("userId", -1)
+                                .apply()
+
+                            
+                            navController.navigate("login") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
                     )
                 }
             }
         }
+
+        // ===== Edit Account =====
         composable("editAccount") {
             currentUserId?.let { userId ->
                 EditAccountScreen(
@@ -112,6 +151,5 @@ fun AppNavigation(navController: NavHostController) {
                 )
             }
         }
-
     }
 }

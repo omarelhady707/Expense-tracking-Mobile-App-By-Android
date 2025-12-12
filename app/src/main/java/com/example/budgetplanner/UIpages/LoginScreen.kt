@@ -1,5 +1,6 @@
 package com.example.budgetplanner.UIpages
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -106,8 +107,16 @@ fun LoginScreen(
             }
 
             // ---------------- Navigation on Success ----------------
+            val ctx = LocalContext.current
+
             LaunchedEffect(viewModel.loginResult.value) {
                 if (viewModel.loginResult.value) {
+                    val sharedPref = ctx.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    sharedPref.edit()
+                        .putBoolean("isLoggedIn", true)
+                        .putInt("userId", viewModel.user_id.value ?: -1)
+                        .apply()
+
                     viewModel.user_id.value?.let { id ->
                         onLoginClick(id)
                     }

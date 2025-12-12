@@ -1,5 +1,6 @@
 package com.example.budgetplanner.UIpages
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -91,8 +92,18 @@ fun SignUpScreen(
         ) {
             Text("Sign Up", fontSize = 16.sp)
         }
+        val ctx = LocalContext.current
         LaunchedEffect(viewModel.user_id.value) {
             viewModel.user_id.value?.let { id ->
+
+
+                val sharedPref = ctx.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+                sharedPref.edit()
+                    .putBoolean("isLoggedIn", true)
+                    .putInt("userId", id)
+                    .apply()
+
                 onSignUpClick(id)
             }
         }

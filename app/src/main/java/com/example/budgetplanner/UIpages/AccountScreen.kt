@@ -26,7 +26,12 @@ import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
-fun AccountScreen(modifier: Modifier = Modifier,user_Id: Int,onEditClick: () -> Unit) {
+fun AccountScreen(
+    modifier: Modifier = Modifier,
+    user_Id: Int,
+    onEditClick: () -> Unit,
+    onLogoutClick: () -> Unit
+){
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
     print("User Id: ${user_Id} ")
     val viewModel: MainDashBoardViewModel =
@@ -92,6 +97,16 @@ fun AccountScreen(modifier: Modifier = Modifier,user_Id: Int,onEditClick: () -> 
             ) {
                 InfoCard(icon = Icons.Default.ShoppingCart, title = "Budget", value = user.budget.toString())
                 InfoCard(icon = Icons.Default.Lock, title = "Password", value = "********")
+                Button(
+                    onClick = { onLogoutClick() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Logout", color = Color.White, fontSize = 16.sp)
+                }
             }
         }
     }
