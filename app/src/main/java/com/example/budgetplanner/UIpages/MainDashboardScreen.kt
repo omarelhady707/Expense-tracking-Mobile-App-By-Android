@@ -1,29 +1,50 @@
 package com.example.budgetplanner.UIpages
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.budgetplanner.R
 import com.example.budgetplanner.ViewModell.MainDashBoardViewModel
 import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
 import com.example.expensetrackingapp.Data.ExpenseEntity
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
+// ========================================
+// CATEGORY IMAGE SELECTOR
+// ========================================
+fun getCategoryImage(category: String): Int = when (category.lowercase()) {
+    "groceries" -> R.drawable.groceries
+    "entertainment" -> R.drawable.entertainment
+    "gas" -> R.drawable.gas
+    "shopping" -> R.drawable.shopping
+    "news paper" -> R.drawable.newspaper
+    "transport" -> R.drawable.transport
+    "rent" -> R.drawable.rent
+    else -> R.drawable.other
+}
+
+// ========================================
+// MAIN DASHBOARD SCREEN
+// ========================================
 @Composable
 fun MainDashboardScreen(
     modifier: Modifier = Modifier,
@@ -31,12 +52,15 @@ fun MainDashboardScreen(
     userId: Int
 ) {
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
-    val viewModel: MainDashBoardViewModel = viewModel(factory = MainDashboardViewModelFactory(db, userId))
+    val viewModel: MainDashBoardViewModel =
+        viewModel(factory = MainDashboardViewModelFactory(db, userId))
+
     val list = viewModel.userexpanses.value ?: emptyList()
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -44,6 +68,7 @@ fun MainDashboardScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             // ===== Greeting =====
             item {
                 Row(
@@ -51,23 +76,20 @@ fun MainDashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = null,
-                            tint = Color.Blue,
-                            modifier = Modifier.size(45.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.shopping),
+                        contentDescription = null,
+                        modifier = Modifier.size(45.dp)
+                    )
 
-                    Column {
+                    Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = viewModel.userinfo.value?.name ?: "Erorr",
+                            text = viewModel.userinfo.value?.name ?: "User",
                             fontWeight = FontWeight.Bold,
                             fontSize = 26.sp
                         )
                         Text(
-                            text = ", Good Morning",
+                            text = "Good Morning",
                             fontSize = 20.sp,
                             color = Color.Gray
                         )
@@ -102,17 +124,68 @@ fun MainDashboardScreen(
                 }
             } else {
                 items(list) { expense ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = expense.category)
-                        Text(text = "$${expense.amount}")
-                    }
+                    ExpenseCard(expense)
                 }
             }
+        }
+    }
+}
+
+// ========================================
+// EXPENSE CARD WITH IMAGE
+// ========================================
+@Composable
+fun ExpenseCard(expense: ExpenseEntity) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .background(Color(0xFFE8E8E8), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = getCategoryImage(expense.category)),
+                        contentDescription = expense.category,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = expense.category,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = expense.date,
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Text(
+                text = "$${expense.amount}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
         }
     }
 }
@@ -124,9 +197,8 @@ fun MainDashboardScreen(
 fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF3F51F5)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF3F51F5)),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
 
@@ -151,10 +223,7 @@ fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
             ) {
 
                 Column {
-                    Text(
-                        "Budget",
-                        color = Color.White.copy(0.7f)
-                    )
+                    Text("Budget", color = Color.White.copy(0.7f))
                     Text(
                         viewModel.userinfo.value?.budget.toString(),
                         color = Color.White,
@@ -163,12 +232,9 @@ fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
                 }
 
                 Column {
+                    Text("Total Expenses", color = Color.White.copy(0.7f))
                     Text(
-                        "Total Expenses",
-                        color = Color.White.copy(0.7f)
-                    )
-                    Text(
-                        viewModel.userinfo.value?.totExpense.toString() ?: "Erorr",
+                        viewModel.userinfo.value?.totExpense.toString(),
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -179,7 +245,7 @@ fun BalanceCard(userId: Int, viewModel: MainDashBoardViewModel) {
 }
 
 // ========================================
-// BOTTOM NAVIGATION
+// BOTTOM NAVIGATION BAR
 // ========================================
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {

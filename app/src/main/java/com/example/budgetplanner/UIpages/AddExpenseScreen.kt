@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.budgetplanner.ExpenseViewModel
 import com.example.budgetplanner.ExpenseViewModelFactory
@@ -36,16 +37,22 @@ data class CategoryItem(
 
 @Composable
 fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
+
     val calendar = Calendar.getInstance()
     var category by remember { mutableStateOf("Entertainment") }
     var amount by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var selectedDay by remember { mutableStateOf(calendar.get(Calendar.DAY_OF_MONTH)) }
+
+
+    var saveMessage by remember { mutableStateOf("") }
+
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
     val viewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(db))
+
     val categoriesList = listOf(
         "Groceries", "Entertainment", "Gas", "Shopping",
-        "News Paper", "Transport", "Rent", "Add Category"
+        "News Paper", "Transport", "Rent", "Other Category"
     )
 
     val categoriesData = listOf(
@@ -56,23 +63,23 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
         CategoryItem(R.drawable.newspaper, "News Paper", Color(0xFFFFE5B4)),
         CategoryItem(R.drawable.transport, "Transport", Color(0xFFBCEAD5)),
         CategoryItem(R.drawable.rent, "Rent", Color(0xFFFFD6E0)),
-        CategoryItem(R.drawable.addcategory, "Add Category", Color(0xFFE0E0E0))
+        CategoryItem(R.drawable.other, "Other Category", Color(0xFFE0E0E0))
     )
-
 
     val monthYearFormat = SimpleDateFormat("MMM yyyy", Locale.ENGLISH)
     val currentMonthYear = monthYearFormat.format(calendar.time)
-
     val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
     Column(
         modifier = Modifier
-            .verticalScroll(rememberScrollState()).padding(bottom = 200.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 200.dp)
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+
         Text(
             "Add Expense",
             fontSize = 28.sp,
@@ -137,6 +144,7 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
         // ===== Inline Calendar =====
         Text(currentMonthYear, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -145,7 +153,6 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
                 .padding(8.dp)
         ) {
             Column {
-                // Days of Month
                 for (weekStart in 1..daysInMonth step 7) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -163,7 +170,11 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
                                         .clickable {
                                             selectedDay = day
                                             val selectedCal = Calendar.getInstance()
-                                            selectedCal.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), day)
+                                            selectedCal.set(
+                                                calendar.get(Calendar.YEAR),
+                                                calendar.get(Calendar.MONTH),
+                                                day
+                                            )
                                             val sdf = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
                                             date = sdf.format(selectedCal.time)
                                         },
@@ -214,7 +225,7 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
 
         // ===== Save Button =====
         Button(
-            onClick = { /* Save Expense */
+            onClick = {
                 user_Id?.let { id ->
                     val expense = ExpenseEntity(
                         userId = id,
@@ -223,8 +234,10 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
                         date = date
                     )
                     viewModel.AddExpense(expense)
-                }
 
+
+                    saveMessage = "Expense saved successfully"
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -232,6 +245,24 @@ fun AddExpenseScreen(modifier: Modifier = Modifier, user_Id: Int?) {
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Save", fontSize = 16.sp)
+        }
+
+
+        if (saveMessage.isNotEmpty()) {
+            Text(
+                text = saveMessage,
+                color = Color(0xFF4CAF50),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                textAlign = TextAlign.Center
+            )
+            LaunchedEffect(saveMessage) {
+                kotlinx.coroutines.delay(1500)
+                saveMessage = ""
+            }
+
         }
     }
 }

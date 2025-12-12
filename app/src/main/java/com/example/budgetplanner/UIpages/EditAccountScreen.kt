@@ -1,6 +1,7 @@
 package com.example.budgetplanner.UIpages
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,22 +34,22 @@ import com.example.expensetrackingapp.Data.ExpenseUserDataBase
 
 @Composable
 fun EditAccountScreen(
-    user_Id:Int,
-    navController : NavHostController
+    user_Id: Int,
+    navController: NavHostController
 ) {
-    var BudgetState = remember { mutableStateOf(0.0) }
-    var passwordState = remember { mutableStateOf("") }
-
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
-    val MainDasshviewModel: MainDashBoardViewModel =
+    val mainViewModel: MainDashBoardViewModel =
         viewModel(factory = MainDashboardViewModelFactory(db, user_Id))
-    val editviewModel: EditViewModel =
+    val editViewModel: EditViewModel =
         viewModel(factory = EditFactory(db, user_Id))
 
-    // Load initial data
-    LaunchedEffect(MainDasshviewModel.userinfo.value) {
-        MainDasshviewModel.userinfo.value?.let { user ->
-            BudgetState.value = user.budget
+    var budgetState = remember { mutableStateOf(0.0) }
+    var passwordState = remember { mutableStateOf("") }
+
+
+    LaunchedEffect(mainViewModel.userinfo.value) {
+        mainViewModel.userinfo.value?.let { user ->
+            budgetState.value = user.budget
             passwordState.value = user.Password
         }
     }
@@ -56,41 +57,74 @@ fun EditAccountScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text("Edit Account", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        // Budget
+        Text(
+            text = "Edit Account",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF3F51B5)
+        )
+
+
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFE8EAF6)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                tint = Color(0xFF3F51B5),
+                modifier = Modifier.size(200.dp)
+            )
+        }
+
+
         OutlinedTextField(
-            value = BudgetState.value.toString(),
+            value = budgetState.value.toString(),
             onValueChange = {
-                BudgetState.value = it.toDoubleOrNull() ?: 0.0
+                budgetState.value = it.toDoubleOrNull() ?: 0.0
             },
             label = { Text("Income") },
+
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Password
+
         OutlinedTextField(
             value = passwordState.value,
             onValueChange = { passwordState.value = it },
             label = { Text("Password") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+            },
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         )
 
+
         Button(
             onClick = {
-            editviewModel.UpdateUserBudget(BudgetState.value)
-            editviewModel.UpdateUserPassword(passwordState.value)
-                navController.navigateUp()     // ← هنا بس!
-
+                editViewModel.UpdateUserBudget(budgetState.value)
+                editViewModel.UpdateUserPassword(passwordState.value)
+                navController.navigateUp()
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
         ) {
-            Text("Save")
+            Text("Save", fontSize = 16.sp, color = Color.White)
         }
     }
 }
