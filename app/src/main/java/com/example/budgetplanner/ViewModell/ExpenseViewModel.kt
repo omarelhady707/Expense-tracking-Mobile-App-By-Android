@@ -34,5 +34,9 @@ class ExpenseViewModel(private val db: ExpenseUserDataBase) : ViewModel() {
             db.getExpenseDao().deleteExpensePerId(User_Expense.userId)
         }
     }
-
+    fun deleteExpenseById(expenseId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            db.getExpenseDao().deleteExpensePerId(expenseId)
+        }
+    }
 }

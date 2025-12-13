@@ -124,7 +124,12 @@ fun MainDashboardScreen(
                 }
             } else {
                 items(list) { expense ->
-                    ExpenseCard(expense)
+                    ExpenseCard(
+                        expense = expense,
+                        onDeleteClick = { id ->
+                            viewModel.deleteExpenseById(id);
+                        }
+                    )
                 }
             }
         }
@@ -135,7 +140,10 @@ fun MainDashboardScreen(
 // EXPENSE CARD WITH IMAGE
 // ========================================
 @Composable
-fun ExpenseCard(expense: ExpenseEntity) {
+fun ExpenseCard(
+    expense: ExpenseEntity,
+    onDeleteClick: (Int) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -181,15 +189,27 @@ fun ExpenseCard(expense: ExpenseEntity) {
                 }
             }
 
-            Text(
-                text = "$${expense.amount}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                Text(
+                    text = "$${expense.amount}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                IconButton(onClick = { onDeleteClick(expense.expenseid) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        contentDescription = "Delete",
+                        tint = Color.Red
+                    )
+                }
+            }
         }
     }
 }
-
 // ========================================
 // BALANCE CARD
 // ========================================
