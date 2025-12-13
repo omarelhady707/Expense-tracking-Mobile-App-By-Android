@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,12 @@ import com.example.budgetplanner.ViewModell.MainDashBoardViewModel
 import com.example.budgetplanner.ViewModell.MainDashboardViewModelFactory
 import com.example.expensetrackingapp.Data.ExpenseEntity
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.FloatingActionButton // for the about app
+import com.example.budgetplanner.AboutActivity
 
 // ========================================
 // CATEGORY IMAGE SELECTOR
@@ -51,14 +58,30 @@ fun MainDashboardScreen(
     navController: NavHostController,
     userId: Int
 ) {
+    //  database identification to use in the button
+    val context = LocalContext.current
+
     val db = ExpenseUserDataBase.getDatabase(LocalContext.current)
     val viewModel: MainDashBoardViewModel =
         viewModel(factory = MainDashboardViewModelFactory(db, userId))
 
   //  val list = viewModel.userexpanses.value ?: emptyList()
     val list = viewModel.userexpanses.value
+    // Contains the About Button
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val intent = Intent(context, AboutActivity::class.java)
+                    context.startActivity(intent)
+                },
+                containerColor = Color(0xFF3F51F5),
+                contentColor = Color.White
+            ) {
+                // Cool icon for the About :)
+                Icon(imageVector = Icons.Default.Info, contentDescription = "About App")
+            }}
     ) { innerPadding ->
 
         LazyColumn(
