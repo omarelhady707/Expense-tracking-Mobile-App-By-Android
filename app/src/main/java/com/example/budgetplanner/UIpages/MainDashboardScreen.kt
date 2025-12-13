@@ -55,8 +55,8 @@ fun MainDashboardScreen(
     val viewModel: MainDashBoardViewModel =
         viewModel(factory = MainDashboardViewModelFactory(db, userId))
 
-    val list = viewModel.userexpanses.value ?: emptyList()
-
+  //  val list = viewModel.userexpanses.value ?: emptyList()
+    val list = viewModel.userexpanses.value
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
@@ -127,7 +127,7 @@ fun MainDashboardScreen(
                     ExpenseCard(
                         expense = expense,
                         onDeleteClick = { id ->
-                            viewModel.deleteExpenseById(id);
+                            viewModel.deleteExpenseById(id)
                         }
                     )
                 }
@@ -199,11 +199,14 @@ fun ExpenseCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                IconButton(onClick = { onDeleteClick(expense.expenseid) }) {
+                IconButton(
+                    onClick = { onDeleteClick(expense.expenseid) }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.delete),
                         contentDescription = "Delete",
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
