@@ -203,7 +203,7 @@ fun ExpenseCard(
                     Icon(
                         painter = painterResource(id = R.drawable.delete),
                         contentDescription = "Delete",
-                        tint = Color.Red
+                        tint = Color.Unspecified
                     )
                 }
             }
