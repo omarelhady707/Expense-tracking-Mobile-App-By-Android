@@ -50,7 +50,7 @@ fun EditAccountScreen(
     LaunchedEffect(mainViewModel.userinfo.value) {
         mainViewModel.userinfo.value?.let { user ->
             budgetState.value = user.budget
-            passwordState.value = user.Password
+            passwordState.value = user.Password.toString()
         }
     }
 

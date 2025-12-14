@@ -1,0 +1,13 @@
+* [33m62901e6[m[33m ([m[1;36mHEAD -> [m[1;32mdataandui[m[33m, [m[1;31morigin/dataandui[m[33m)[m Unit Testing Added
+* [33m419984a[m Intent Is Done
+* [33m14317a6[m handle Recent Expense Performance
+* [33ma98136e[m  edit the delete button
+* [33mc9a0c1b[m add delete button
+* [33m278f7bf[m Splash Screen
+* [33m77dba68[m  SharedPreferences & logout done
+* [33m7b6932e[m ui
+* [33m26b56cf[m connection Room With all Screens but have logic or performance issue
+* [33m4fbc3f1[m Connection between Room and login,DashBoard,Account,AddExpense screens
+* [33mab99d8b[m intial connect login ,maindashboard, addexpense screens with view models and database
+* [33ma3389d6[m Edit Butto & Scrollllll
+* [33m85777ce[m My local UI modifications

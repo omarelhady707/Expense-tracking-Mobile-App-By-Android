@@ -3,6 +3,7 @@ package com.example.expensetrackingapp.Data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
@@ -10,10 +11,15 @@ interface UserDAO {
     @Query("Select * From usertable")
     suspend fun getAllUsers():List<UserEntity> //For Admin
 
+    @Query("SELECT * FROM usertable WHERE email = :email LIMIT 1")
+    suspend fun getUserByEmail(email: String): UserEntity?
+
     @Query("SELECT * FROM usertable WHERE userId = :id LIMIT 1")
     suspend fun getUserById(id: Int): UserEntity?
-    @Insert
-    suspend fun addUser(user: UserEntity): Long
+    // In your UserDao.kt file
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addUser(user: UserEntity): Long // It must return Long
+
     @Delete
     suspend fun DeleteUser(user: UserEntity)
 

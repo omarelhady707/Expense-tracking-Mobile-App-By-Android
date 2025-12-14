@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     // مهم جدًا عشان Room يشتغل مع Kotlin
     id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -73,6 +74,10 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     kapt("androidx.room:room-compiler:$room_version")
 
     // Testing
