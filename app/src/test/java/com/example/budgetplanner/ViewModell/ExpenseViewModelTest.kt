@@ -1,7 +1,7 @@
 package com.example.budgetplanner.ViewModell
 
 import com.example.budgetplanner.ExpenseViewModel
-import com.example.budgetplanner.MainDispatcherRule // Using the rule from your previous context
+import com.example.budgetplanner.MainDispatcherRule 
 import com.example.expensetrackingapp.Data.ExpenseDAO
 import com.example.expensetrackingapp.Data.ExpenseEntity
 import com.example.expensetrackingapp.Data.ExpenseUserDataBase
@@ -28,7 +28,7 @@ class ExpenseViewModelTest {
     private lateinit var userDao: UserDAO
     private lateinit var viewModel: ExpenseViewModel
 
-    // Helper to create dummy entities
+    // create dummy 
     private val dummyExpense = ExpenseEntity(userId = 1, amount = 100.0, date = "2024-01-01", category = "Food")
 
     @Before
@@ -37,7 +37,6 @@ class ExpenseViewModelTest {
         expenseDao = mock()
         userDao = mock()
 
-        // Critical: Your AddExpense function calls BOTH Daos.
         whenever(db.getExpenseDao()).thenReturn(expenseDao)
         whenever(db.getUserDao()).thenReturn(userDao)
 
@@ -50,13 +49,11 @@ class ExpenseViewModelTest {
         advanceUntilIdle()
 
         verify(expenseDao).addExpense(dummyExpense)
-        // Also verifying the side effect in your code where it fetches the user
         verify(userDao).getUserById(dummyExpense.userId)
     }
 
     @Test
     fun `AddExpense with existing ID`() = runTest {
-        // In unit tests with mocks, "existing ID" logic is handled by the DB.
         // Here we just verify the VM passes the call through.
         viewModel.AddExpense(dummyExpense)
         advanceUntilIdle()
@@ -75,7 +72,7 @@ class ExpenseViewModelTest {
 
     @Test
     fun `AddExpense with null or empty fields`() = runTest {
-        // Kotlin non-nullable types prevent true nulls, but we can test empty strings
+        // test empty strings
         val emptyExpense = dummyExpense.copy(date = "", category = "")
 
         viewModel.AddExpense(emptyExpense)
@@ -86,9 +83,9 @@ class ExpenseViewModelTest {
 
     @Test
     fun `AddExpense thread safety`() = runTest {
-        // Simulate firing multiple adds rapidly
+        // Simulate multiple adds
         repeat(5) {
-            launch(Dispatchers.IO) { // Using IO as per your ViewModel
+            launch(Dispatchers.IO) { 
                 viewModel.AddExpense(dummyExpense)
             }
         }
@@ -107,8 +104,7 @@ class ExpenseViewModelTest {
 
     @Test
     fun `get AllExpense per UserID for user with no expenses`() = runTest {
-        // Since the function returns Unit, we verify the DAO call happens.
-        // The "Empty List" result would be returned by the DAO, not the VM function itself.
+        
         viewModel.get_AllExpense_per_UserID(dummyExpense)
         advanceUntilIdle()
         verify(expenseDao).get_all_Expense_aboutUser(dummyExpense.userId)
@@ -162,7 +158,6 @@ class ExpenseViewModelTest {
     fun `DeleteExpensePerDate for date with no expenses`() = runTest {
         viewModel.DeleteExpensePerDate(dummyExpense)
         advanceUntilIdle()
-        // The VM should still attempt the delete
         verify(expenseDao).deleteExpensePerDate(dummyExpense.date)
     }
 
@@ -218,15 +213,11 @@ class ExpenseViewModelTest {
 
     @Test
     fun `Coroutine cancellation check`() = runTest {
-        // We simulate cancellation by cancelling the scope job
+        // simulate cancellation
         val job = launch {
             viewModel.AddExpense(dummyExpense)
         }
-        job.cancel() // Cancel immediately
-
-        // In a real scenario, we might check if the DB call was *not* made,
-        // but since we can't control race conditions perfectly in simple tests,
-        // we mainly ensure no crash occurs on cancel.
+        job.cancel() 
         advanceUntilIdle()
     }
 
