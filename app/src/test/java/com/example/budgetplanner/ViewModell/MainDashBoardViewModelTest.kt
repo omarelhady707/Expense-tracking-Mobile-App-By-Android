@@ -26,20 +26,17 @@ class MainDashBoardViewModelTest {
     private lateinit var db: ExpenseUserDataBase
     private lateinit var userDao: UserDAO
     private lateinit var expenseDao: ExpenseDAO
-    // ViewModel is created inside tests to handle the init{} block logic
     private lateinit var viewModel: MainDashBoardViewModel
 
     private val testUserId = 1
 
     // Dummy Data
     private val dummyUser = UserEntity(testUserId, "Test", "email", "pass", 0.0, 1000.0)
-    // FIXED: Use named arguments
     private val dummyExpense = ExpenseEntity(
         userId = testUserId,
         amount = 100.0,
         date = "2024-01-01",
         category = "Food"
-        // If there is an 'id' field, Kotlin will use its default value (usually 0)
     )
 
     @Before
@@ -54,15 +51,13 @@ class MainDashBoardViewModelTest {
 
     @Test
     fun `getUserinfo initial state`() = runTest {
-        // We delay the mock response to simulate "loading" state
+        //  delay the mock response to simulate "loading" state
         whenever(userDao.getUserById(testUserId)).thenAnswer {
-            Thread.sleep(100) // Simulate network/disk delay
+            Thread.sleep(100) // Simulate network delay
             dummyUser
         }
 
         viewModel = MainDashBoardViewModel(db, testUserId)
-
-        // Before we advance time, state should be null
         assertNull(viewModel.userinfo.value)
     }
 
@@ -93,15 +88,10 @@ class MainDashBoardViewModelTest {
     fun `load userinfo database error`() = runTest {
         whenever(userDao.getUserById(any())).thenThrow(RuntimeException("DB Crash"))
 
-        // Create VM. The exception happens in a coroutine (IO).
-        // Since we don't catch it in VM, this test checks if the *Testing Framework* catches it
-        // or if the app logic swallows it (which it doesn't).
-        // For "Easy Pass", we simply ensure the construction doesn't crash the test runner immediately.
         try {
             viewModel = MainDashBoardViewModel(db, testUserId)
             advanceUntilIdle()
         } catch (e: Exception) {
-            // Expected behavior given the code doesn't have try-catch
         }
     }
 
@@ -117,7 +107,7 @@ class MainDashBoardViewModelTest {
 
     @Test
     fun `load userExpances triggers CalcBalancePrice`() = runTest {
-        // CalcBalancePrice calls getUserDao().updateTotExpense. We verify that call.
+        // CalcBalancePrice calls getUserDao().updateTotExpense.
         whenever(userDao.getUserById(testUserId)).thenReturn(dummyUser)
         whenever(expenseDao.get_all_Expense_aboutUser(testUserId)).thenReturn(listOf(dummyExpense))
 
@@ -167,9 +157,8 @@ class MainDashBoardViewModelTest {
         viewModel = MainDashBoardViewModel(db, testUserId)
         advanceUntilIdle()
 
-        // Should not crash, balance remains 0.0 (initial)
+        // Should not crash, balance remains 0
         assertEquals(0.0, viewModel.BalancePrice.value, 0.0)
-        // verify updateTotExpense was NEVER called
         verify(userDao, never()).updateTotExpense(any(), any())
     }
 
@@ -186,7 +175,6 @@ class MainDashBoardViewModelTest {
 
     @Test
     fun `deleteExpenseById with invalid expenseId`() = runTest {
-        // Database handles logic, VM just passes the ID.
         viewModel = MainDashBoardViewModel(db, testUserId)
 
         viewModel.deleteExpenseById(-1)
@@ -202,15 +190,11 @@ class MainDashBoardViewModelTest {
         viewModel.deleteExpenseById(1)
         advanceUntilIdle()
 
-        // Verify "get_all_Expense_aboutUser" is called TWICE:
-        // 1. During init block
-        // 2. After deleteExpenseById to refresh
         verify(expenseDao, times(2)).get_all_Expense_aboutUser(testUserId)
     }
 
     @Test
     fun `ViewModel Init block triggers data loads`() = runTest {
-        // Just creating the VM should trigger these calls
         viewModel = MainDashBoardViewModel(db, testUserId)
         advanceUntilIdle()
 
@@ -227,7 +211,6 @@ class MainDashBoardViewModelTest {
         viewModel.deleteExpenseById(2)
         advanceUntilIdle()
 
-        // Verify calls went through
         verify(expenseDao).deleteExpensePerId(1)
         verify(expenseDao).deleteExpensePerId(2)
     }
