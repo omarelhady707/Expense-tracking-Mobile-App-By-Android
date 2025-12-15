@@ -27,9 +27,9 @@ class SignUpViewModelTest {
     private lateinit var userDao: UserDAO
     private lateinit var viewModel: SignUpViewModel
 
-    // Helper: Valid User Data
+    // Valid User Data
     private val validUser = UserEntity(
-        userId = 0, // 0 usually means auto-generate in Room
+        userId = 0, // 0 means auto-generate in Room
         name = "Test User",
         email = "test@example.com",
         Password = "password123",
@@ -47,7 +47,6 @@ class SignUpViewModelTest {
 
     @Test
     fun `AddNewUserandGetId with a valid new user`() = runTest {
-        // Stub: DAO returns ID 100
         whenever(userDao.addUser(validUser)).thenReturn(100L)
 
         viewModel.AddNewUserandGetId(validUser)
@@ -55,7 +54,6 @@ class SignUpViewModelTest {
 
         // Verify DAO was called
         verify(userDao).addUser(validUser)
-        // Verify state update
         assertEquals(100, viewModel.user_id.value)
     }
 
@@ -66,10 +64,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `AddNewUserandGetId coroutine dispatcher check`() = runTest {
-        // We verify the action completes. In unit tests with MainDispatcherRule,
-        // Dispatchers.Main is replaced. Dispatchers.IO usually runs on the test thread too
-        // unless specifically configured otherwise.
-        // Simply verifying execution confirms the coroutine launched.
+
         whenever(userDao.addUser(any())).thenReturn(1L)
 
         viewModel.AddNewUserandGetId(validUser)
@@ -80,15 +75,10 @@ class SignUpViewModelTest {
 
     @Test
     fun `AddNewUserandGetId with null user object`() {
-        // Kotlin Compile-time safety prevents passing 'null' to 'AddNewUserandGetId(newuser: UserEntity)'.
-        // This test is technically not needed in pure Kotlin, but if we force it via reflection or Java:
-        // logic would crash. We'll skip implementation as it's unreachable code in standard Kotlin usage.
     }
 
     @Test
     fun `AddNewUserandGetId with user object having null fields`() = runTest {
-        // If the Entity allows nulls but the DB column doesn't, the DAO throws exception.
-        // We simulate that DAO exception here.
         val invalidUser = validUser.copy(name = "") // simulating "bad" data
         whenever(userDao.addUser(invalidUser)).thenThrow(RuntimeException("NotNull Constraint"))
 
@@ -102,14 +92,13 @@ class SignUpViewModelTest {
 
     @Test
     fun `AddNewUserandGetId database returns a large ID`() = runTest {
-        // ID larger than Int.MAX_VALUE (2147483647)
+        // ID larger than Int.MAX_VALUE
         val largeId = 2147483648L
         whenever(userDao.addUser(validUser)).thenReturn(largeId)
 
         viewModel.AddNewUserandGetId(validUser)
         advanceUntilIdle()
-
-        // Verify overflow behavior (Long -> Int cast wraps around to negative)
+        // Verify overflow behavior 
         assertEquals(largeId.toInt(), viewModel.user_id.value)
     }
 
@@ -119,7 +108,7 @@ class SignUpViewModelTest {
 
         viewModel.AddNewUserandGetId(validUser)
         viewModel.AddNewUserandGetId(validUser)
-        viewModel.AddNewUserandGetId(validUser) // Last call gets 3L
+        viewModel.AddNewUserandGetId(validUser)
 
         advanceUntilIdle()
 
@@ -128,7 +117,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `ViewModel lifecycle and coroutine cancellation`() = runTest {
-        // Simulate a long running DB op
+        // Simulate a long running DB 
         whenever(userDao.addUser(any())).thenAnswer {
             Thread.sleep(200)
             1L
@@ -138,17 +127,13 @@ class SignUpViewModelTest {
             viewModel.AddNewUserandGetId(validUser)
         }
 
-        // Cancel immediately (simulate ViewModel cleared)
         job.cancel()
         advanceUntilIdle()
-
-        // Verify state was NOT updated because we cancelled before it finished
         assertNull(viewModel.user_id.value)
     }
 
     @Test
     fun `Thread safety of user id updates`() = runTest {
-        // Simulate concurrent updates
         whenever(userDao.addUser(any())).thenReturn(1L)
 
         // Launch multiple updates
@@ -157,7 +142,6 @@ class SignUpViewModelTest {
         }
         advanceUntilIdle()
 
-        // Just verify it settles on a value (1) and didn't crash
         assertEquals(1, viewModel.user_id.value)
     }
 
