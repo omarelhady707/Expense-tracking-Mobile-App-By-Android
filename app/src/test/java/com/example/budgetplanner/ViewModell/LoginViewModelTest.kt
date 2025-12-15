@@ -29,7 +29,7 @@ class LoginViewModelTest {
     private lateinit var userDao: UserDAO
     private lateinit var viewModel: LoginViewModel
 
-    // Helper: Valid User Data
+    //  Valid User Data
     private val validUser = UserEntity(
         userId = 1,
         name = "Test User",
@@ -79,24 +79,19 @@ class LoginViewModelTest {
 
     @Test
     fun `Database operation throwing an exception`() = runTest {
-        // Stub DB to throw exception
         whenever(userDao.login(any(), any())).thenThrow(RuntimeException("DB Error"))
 
         try {
             viewModel.getUserByEmailandPassword("user", "pass")
             advanceUntilIdle()
         } catch (e: Exception) {
-            // Since the ViewModel doesn't have try-catch, it crashes.
-            // We catch it here to confirm the crash happens.
-            // In a real app, you should add try-catch to the VM.
+
             assertTrue(e is RuntimeException)
         }
     }
 
     @Test
     fun `Concurrent login attempts handling`() = runTest {
-        // We simulate a slow first request and a fast second request
-        // Since VM uses IO dispatcher, they run in parallel (or sequentially on single thread test dispatcher)
 
         whenever(userDao.login("user1", "pass1")).thenReturn(validUser)
         whenever(userDao.login("user2", "pass2")).thenReturn(null)
@@ -106,8 +101,6 @@ class LoginViewModelTest {
 
         advanceUntilIdle()
 
-        // Verify result matches the last finished operation or specific logic.
-        // In this simple VM, race conditions happen. We just verify no crash.
         assertTrue(viewModel.loginResult.value == true || viewModel.loginResult.value == false)
     }
 
@@ -138,36 +131,36 @@ class LoginViewModelTest {
 
     @Test
     fun `State transition from success to failure`() = runTest {
-        // 1. Success
+        // Success
         whenever(userDao.login("valid", "valid")).thenReturn(validUser)
         viewModel.getUserByEmailandPassword("valid", "valid")
         advanceUntilIdle()
         assertTrue(viewModel.loginResult.value)
 
-        // 2. Failure
+        // Failure
         whenever(userDao.login("invalid", "invalid")).thenReturn(null)
         viewModel.getUserByEmailandPassword("invalid", "invalid")
         advanceUntilIdle()
 
-        // 3. Assert Failure State
+        // Assert Failure State
         assertFalse(viewModel.loginResult.value)
         assertEquals("Email or Password is incorrect", viewModel.loginError.value)
     }
 
     @Test
     fun `State transition from failure to success`() = runTest {
-        // 1. Failure
+        // Failure
         whenever(userDao.login("invalid", "invalid")).thenReturn(null)
         viewModel.getUserByEmailandPassword("invalid", "invalid")
         advanceUntilIdle()
         assertFalse(viewModel.loginResult.value)
 
-        // 2. Success
+        // Success
         whenever(userDao.login("valid", "valid")).thenReturn(validUser)
         viewModel.getUserByEmailandPassword("valid", "valid")
         advanceUntilIdle()
 
-        // 3. Assert Success State
+        // Assert Success State
         assertTrue(viewModel.loginResult.value)
         assertEquals("", viewModel.loginError.value) // Error should be cleared
         assertEquals(1, viewModel.user_id.value)
