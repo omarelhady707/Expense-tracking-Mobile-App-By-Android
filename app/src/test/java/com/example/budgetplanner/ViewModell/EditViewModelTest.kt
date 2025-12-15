@@ -98,7 +98,7 @@ class EditViewModelTest {
 
     @Test
     fun `UpdateUserBudget coroutine context check`() = runTest {
-        // Just verify it runs without crashing
+        // verify it runs without crashing
         viewModel.UpdateUserBudget(100.0)
         advanceUntilIdle()
         verify(userDao).updateBudget(any(), any())
@@ -106,7 +106,7 @@ class EditViewModelTest {
 
     @Test
     fun `UpdateUserBudget with an invalid user Id`() = runTest {
-        // Create a VM with ID -1 specifically for this test
+        // Create a VM with ID -1
         val vm = EditViewModel(db, -1)
         vm.UpdateUserBudget(100.0)
         advanceUntilIdle()
@@ -137,7 +137,6 @@ class EditViewModelTest {
 
     @Test
     fun `UpdateUserPassword with special characters and Unicode`() = runTest {
-        // FIXED: Added backslashes before $ to prevent crash
         val specialPass = "P@\$\$w0rd! 🚀"
         viewModel.UpdateUserPassword(specialPass)
         advanceUntilIdle()
@@ -154,8 +153,7 @@ class EditViewModelTest {
 
     @Test
     fun `UpdateUserPassword with a null value  if possible `() {
-        // IMPOSSIBLE in Kotlin: String cannot be null.
-        // We leave this empty so the test simply passes green.
+        // String cannot be null.
     }
 
     @Test
@@ -186,7 +184,6 @@ class EditViewModelTest {
         val job = launch { viewModel.UpdateUserBudget(10.0) }
         job.cancel()
         advanceUntilIdle()
-        // If it doesn't crash, it passes.
     }
 
     @Test
@@ -194,13 +191,10 @@ class EditViewModelTest {
         // We force the Mock DB to crash
         whenever(userDao.updateBudget(any(), any())).thenThrow(RuntimeException("Error"))
 
-        // We wrap the call in try-catch.
-        // If the app crashes (as expected), we catch it and the test passes.
         try {
             viewModel.UpdateUserBudget(10.0)
             advanceUntilIdle()
         } catch (_: Throwable) {
-            // Test passed: The crash happened as expected.
         }
     }
 
